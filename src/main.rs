@@ -1,71 +1,25 @@
-use std::collections::HashMap;
 use std::sync::atomic::AtomicUsize;
 
-use axum::Extension; // extensions have to be clonable
-use axum::extract::Path;
-use axum::extract::Query;
+use axum::Json;
 use axum::extract::State;
-use axum::http::HeaderMap;
 use axum::{Router, response::Html, routing::get};
 use std::sync::Arc; // common wrapper for State because most of the time the State will be cloned into a handler function
 
-struct MyCounter {
-    counter: AtomicUsize,
+struct Counter {
+    count: AtomicUsize,
     // note: if using Mutex to lock some data, make sure to use wisely and not Mutex the root data or global data or you would be locking the whole handler having to wait
-}
-
-struct MyConfig {
-    text: String,
-}
-
-struct MyState(i32);
-
-fn service_one() -> Router {
-    let state = Arc::new(MyState(5));
-
-    Router::new().route("/", get(sv1_handler)).with_state(state)
-}
-
-async fn sv1_handler(
-    Extension(counter): Extension<Arc<MyCounter>>,
-    State(state): State<Arc<MyState>>,
-) -> Html<String> {
-    counter
-        .counter
-        .fetch_add(1, std::sync::atomic::Ordering::Relaxed);
-
-    Html(format!(
-        "Service {}-{}",
-        counter.counter.load(std::sync::atomic::Ordering::Relaxed),
-        state.0
-    ))
-    // state will be kept since it is being shared, if request here and in the root will see the counter keeps couting between routes
-}
-
-fn service_two() -> Router {
-    Router::new().route("/", get(|| async { Html("Service Two".to_string()) }))
 }
 
 #[tokio::main]
 async fn main() {
-    let shared_counter = Arc::new(MyCounter {
-        counter: AtomicUsize::new(0),
-    });
-
-    let shared_text = Arc::new(MyConfig {
-        text: "This is my configuration".to_string(),
+    let counter = Arc::new(Counter {
+        count: AtomicUsize::new(0),
     });
 
     let app = Router::new()
-        .nest("/1", service_one()) // calling the function instead of poiting at it
-        .nest("/2", service_two())
         .route("/", get(handler))
-        .route("/book/{id}", get(path_extract))
-        .route("/book", get(query_extract))
-        .route("/header", get(header_extract))
-        .layer(Extension(shared_text))
-        .layer(Extension(shared_counter)); // layer system is ideal to use with database connection
-    // .with_state(shared_config);
+        .route("/inc", get(increment))
+        .with_state(counter);
     // state is local to the service Router; if have data needed to be shared between modules it has to go in a layer (Extension)
 
     // axum do anything if not talking to the network
@@ -79,32 +33,22 @@ async fn main() {
     axum::serve(listener, app).await.unwrap();
 }
 
-async fn handler(
-    Extension(counter): Extension<Arc<MyCounter>>,
-    Extension(config): Extension<Arc<MyConfig>>, // destructuring
-) -> Html<String> {
-    counter
-        .counter
+async fn handler() -> Html<String> {
+    println!("Sending GET request");
+    let current_count = reqwest::get("http://localhost:3001/inc")
+        .await
+        .unwrap()
+        .json::<i32>()
+        .await
+        .unwrap();
+
+    Html(format!("<h1>Remote Counter: {current_count}</h1>"))
+}
+
+async fn increment(State(counter): State<Arc<Counter>>) -> Json<usize> {
+    println!("/inc service called");
+    let current_value = counter
+        .count
         .fetch_add(1, std::sync::atomic::Ordering::Relaxed);
-
-    Html(format!(
-        "<h1>{} Your are visitor number {}</h1>",
-        config.text,
-        counter.counter.load(std::sync::atomic::Ordering::Relaxed)
-    ))
-}
-
-async fn path_extract(Path(id): Path<u32>) -> Html<String> {
-    Html(format!("Hello, {id}!"))
-}
-
-async fn query_extract(Query(params): Query<HashMap<String, String>>) -> Html<String> {
-    Html(format!("Hello, {params:#?}!"))
-}
-
-async fn header_extract(
-    headers: HeaderMap,
-    // is not really a extractor
-) -> Html<String> {
-    Html(format!("{headers:#?}"))
+    Json(current_value)
 }
