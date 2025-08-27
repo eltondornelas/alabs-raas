@@ -4,7 +4,7 @@ use std::sync::atomic::AtomicUsize;
 use axum::Extension; // extensions have to be clonable
 use axum::extract::Path;
 use axum::extract::Query;
-// use axum::extract::State;
+use axum::extract::State;
 use axum::http::HeaderMap;
 use axum::{Router, response::Html, routing::get};
 use std::sync::Arc; // common wrapper for State because most of the time the State will be cloned into a handler function
@@ -18,8 +18,28 @@ struct MyConfig {
     text: String,
 }
 
+struct MyState(i32);
+
 fn service_one() -> Router {
-    Router::new().route("/", get(|| async { Html("Service One".to_string()) }))
+    let state = Arc::new(MyState(5));
+
+    Router::new().route("/", get(sv1_handler)).with_state(state)
+}
+
+async fn sv1_handler(
+    Extension(counter): Extension<Arc<MyCounter>>,
+    State(state): State<Arc<MyState>>,
+) -> Html<String> {
+    counter
+        .counter
+        .fetch_add(1, std::sync::atomic::Ordering::Relaxed);
+
+    Html(format!(
+        "Service {}-{}",
+        counter.counter.load(std::sync::atomic::Ordering::Relaxed),
+        state.0
+    ))
+    // state will be kept since it is being shared, if request here and in the root will see the counter keeps couting between routes
 }
 
 fn service_two() -> Router {
@@ -46,6 +66,7 @@ async fn main() {
         .layer(Extension(shared_text))
         .layer(Extension(shared_counter)); // layer system is ideal to use with database connection
     // .with_state(shared_config);
+    // state is local to the service Router; if have data needed to be shared between modules it has to go in a layer (Extension)
 
     // axum do anything if not talking to the network
     // axum uses tokio to handle connectivity
