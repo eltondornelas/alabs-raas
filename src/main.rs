@@ -1,16 +1,17 @@
 use std::time::Duration;
 
 use axum::{
-    Router,
-    http::HeaderMap,
-    response::{Html, IntoResponse},
-    routing::get,
+    extract::Request, http::HeaderMap, middleware::{self, Next}, response::{Html, IntoResponse}, routing::get, Router
 };
 use reqwest::StatusCode;
 
 #[tokio::main]
 async fn main() {
-    let app = Router::new().route("/", get(header_handler));
+    let app = Router::new()
+        .route("/", get(header_handler))
+        .route_layer(middleware::from_fn(auth));  
+        // every request goes to it before goes to the handler
+        // going back to nested router you can separete them with those that need authentication from that don't need
 
     let listener = tokio::net::TcpListener::bind("127.0.0.1:3001")
         .await
@@ -38,6 +39,34 @@ async fn make_request() {
         .unwrap();
 
     println!("{}", response);
+
+    let response = reqwest::Client::new()
+        .get("http://localhost:3001/")
+        .header("x-request-id", "bad")
+        .send()
+        .await
+        .unwrap()
+        .text()
+        .await
+        .unwrap();
+
+    println!("{}", response);
+}
+
+async fn auth(
+    headers: HeaderMap,
+    req: Request,
+    next: Next
+) -> Result<impl IntoResponse, (StatusCode, String)> {
+    // TODO: Fix this to not succeed when there isn't a header
+    if let Some(header) = headers.get("x-request-id") {
+        // Validate the header
+        if header.to_str().unwrap() == "1234" {
+            return Ok(next.run(req).await);
+        }
+    }
+
+    Err((StatusCode::UNAUTHORIZED, "invalid header".to_string()))
 }
 
 async fn header_handler(headers: HeaderMap) -> Html<String> {
