@@ -1,7 +1,12 @@
 use std::time::Duration;
 
 use axum::{
-    extract::Request, http::HeaderMap, middleware::{self, Next}, response::{Html, IntoResponse}, routing::get, Router
+    Extension, Router,
+    extract::Request,
+    http::HeaderMap,
+    middleware::{self, Next},
+    response::{Html, IntoResponse},
+    routing::get,
 };
 use reqwest::StatusCode;
 
@@ -9,9 +14,9 @@ use reqwest::StatusCode;
 async fn main() {
     let app = Router::new()
         .route("/", get(header_handler))
-        .route_layer(middleware::from_fn(auth));  
-        // every request goes to it before goes to the handler
-        // going back to nested router you can separete them with those that need authentication from that don't need
+        .route_layer(middleware::from_fn(auth));
+    // every request goes to it before goes to the handler
+    // going back to nested router you can separete them with those that need authentication from that don't need
 
     let listener = tokio::net::TcpListener::bind("127.0.0.1:3001")
         .await
@@ -53,15 +58,23 @@ async fn make_request() {
     println!("{}", response);
 }
 
+#[derive(Clone)]
+struct AuthHeader {
+    id: String,
+}
+
 async fn auth(
     headers: HeaderMap,
-    req: Request,
-    next: Next
+    mut req: Request,
+    next: Next,
 ) -> Result<impl IntoResponse, (StatusCode, String)> {
-    // TODO: Fix this to not succeed when there isn't a header
     if let Some(header) = headers.get("x-request-id") {
         // Validate the header
-        if header.to_str().unwrap() == "1234" {
+        let header = header.to_str().unwrap();
+        if header == "1234" {
+            req.extensions_mut().insert(AuthHeader {
+                id: header.to_string(),
+            });
             return Ok(next.run(req).await);
         }
     }
@@ -69,10 +82,6 @@ async fn auth(
     Err((StatusCode::UNAUTHORIZED, "invalid header".to_string()))
 }
 
-async fn header_handler(headers: HeaderMap) -> Html<String> {
-    if let Some(header) = headers.get("x-request-id") {
-        Html(format!("x-request-id: {}", header.to_str().unwrap()))
-    } else {
-        Html("x-request-id not found".to_string())
-    }
+async fn header_handler(Extension(auth): Extension<AuthHeader>) -> Html<String> {
+    Html(format!("x-request-id: {}", auth.id))
 }
