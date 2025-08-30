@@ -1,10 +1,31 @@
-use axum::{Router, response::Html, routing::get};
+use axum::{
+    Router,
+    response::{Html, IntoResponse},
+    routing::get,
+};
+use reqwest::Method;
+use tower::{ServiceBuilder, limit::ConcurrencyLimitLayer};
+use tower_http::{
+    compression::CompressionLayer,
+    cors::{Any, CorsLayer},
+};
 
 #[tokio::main]
 async fn main() {
-    let other = Router::new().route("/other", get(handler2));
+    let service = ServiceBuilder::new()
+        .layer(CompressionLayer::new())
+        .layer(
+            CorsLayer::new()
+                .allow_methods([Method::GET, Method::POST])
+                .allow_origin(Any),
+        )
+        .layer(ConcurrencyLimitLayer::new(100));
 
-    let app = Router::new().route("/", get(handler)).merge(other);
+    let app = Router::new()
+        .route("/", get(handler))
+        .layer(service.into_inner());
+    // .layer(CompressionLayer::new());
+    // can see on browser the difference between "size" and "transferred", the Compression do it on the fly
 
     let listener = tokio::net::TcpListener::bind("127.0.0.1:3001")
         .await
@@ -14,10 +35,7 @@ async fn main() {
     axum::serve(listener, app).await.unwrap();
 }
 
-async fn handler() -> Html<&'static str> {
-    Html("<h1>Hello, World!</h1>")
-}
-
-async fn handler2() -> Html<&'static str> {
-    Html("<h1>Hello, World 2!</h1>")
+async fn handler() -> impl IntoResponse {
+    const WAR_AND_PEACE: &str = include_str!("war_and_peace.txt");
+    Html(WAR_AND_PEACE)
 }
