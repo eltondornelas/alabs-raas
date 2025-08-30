@@ -7,5 +7,10 @@ edition = "2024"
 
 [workspace]
 members = [
-    "rest_service/router_layer_response"
+    "rest_service/router_layer_response",
+     "tracing/axum_minimal_tracing"
 ]
+
+[workspace.dependencies]
+axum = { version = "0.8.4", workspace = true } 
+tokio = { version = "1.47.1", features = ["full"], workspace = true }
