@@ -127,6 +127,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "axum_tracing_tower"
+version = "0.1.0"
+dependencies = [
+ "axum",
+ "tokio",
+ "tower-http",
+ "tracing",
+ "tracing-subscriber",
+]
+
+[[package]]
 name = "backtrace"
 version = "0.3.75"
 source = "registry+https://github.com/rust-lang/crates.io-index"
