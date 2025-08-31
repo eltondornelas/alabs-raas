@@ -12,7 +12,8 @@ members = [
     # tracing
     "tracing/axum_minimal_tracing", #1
     "tracing/axum_timing_spans", #3
-    "tracing/axum_tracing_tower" #2
+    "tracing/axum_tracing_tower", #2
+    "tracing/trace_to_file" #4
 ]
 
 [workspace.dependencies]
