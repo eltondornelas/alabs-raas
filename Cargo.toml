@@ -10,7 +10,8 @@ members = [
     "rest_service/router_layer_response",
     
     # tracing
-    "tracing/axum_minimal_tracing", # 1
+    "tracing/axum_minimal_tracing", #1
+    "tracing/axum_timing_spans", #3
     "tracing/axum_tracing_tower" #2
 ]
 
