@@ -1,6 +1,6 @@
-use axum::{body::Body, http::Request, response::Html, routing::get, Router};
-use tower_http::trace::{Trace, TraceLayer};
-use tracing::{info, instrument};
+use axum::{Router, body::Body, http::Request, response::Html, routing::get};
+use tower_http::trace::TraceLayer;
+use tracing::info;
 use tracing_subscriber::fmt::format::FmtSpan;
 
 #[tokio::main]
@@ -31,7 +31,20 @@ async fn main() {
     let app =
         Router::new()
             .route("/", get(handler))
-            .layer(TraceLayer::new_for_http());
+            .layer(
+                TraceLayer::new_for_http().make_span_with(|request: &Request<Body>| {
+                    let request_id = uuid::Uuid::new_v4();
+                    tracing::span!(
+                        tracing::Level::INFO,
+                        "request",
+                        method = tracing::field::display(request.method()),
+                        uri = tracing::field::display(request.uri()),
+                        version = tracing::field::debug(request.version()),
+                        request_id = tracing::field::display(request_id)
+                    )
+                }),
+            );
+    // .layer(TraceLayer::new_for_http());
 
     let listener = tokio::net::TcpListener::bind("127.0.0.1:3001")
         .await
@@ -42,8 +55,10 @@ async fn main() {
 }
 
 // create a span when the handler runs and ends the span when the handler finish
-#[instrument]
+// #[instrument]
 async fn handler() -> Html<&'static str> {
     info!("Serving Hello World");
     Html("<h1>Hello, World!</h1>")
 }
+
+// cargo add uuid -F v4 (v4 was the first version to incorporate automatic random generation)
