@@ -1,4 +1,4 @@
-use axum::{response::Html, routing::get, Router};
+use axum::{Router, response::Html, routing::get};
 use tower_http::trace::TraceLayer;
 use tracing::info;
 
@@ -11,8 +11,8 @@ async fn main() {
     let app = Router::new()
         .route("/", get(handler))
         .layer(TraceLayer::new_for_http());
-        // careful with this trace it will log tons of iformation
-        // need de RUST_LOG=debug variable
+    // careful with this trace it will log tons of iformation
+    // need de RUST_LOG=debug variable
 
     let listener = tokio::net::TcpListener::bind("127.0.0.1:3001")
         .await
