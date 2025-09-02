@@ -6,10 +6,14 @@ edition = "2024"
 [dependencies]
 
 [workspace]
-members = [
+members = [ 
+    # open_api section
+    "open_api/axum_open_api",
+    
+    # rest_service section
     "rest_service/router_layer_response",
     
-    # tracing
+    # tracing section
     "tracing/axum_minimal_tracing", #1
     "tracing/axum_timing_spans", #3
     "tracing/axum_tracing_tower", #2 
