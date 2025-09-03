@@ -7,6 +7,9 @@ edition = "2024"
 
 [workspace]
 members = [ 
+    # configurations
+    "config/config_envfile", #1
+    
     # open_api section
     "open_api/axum_open_api",
     
