@@ -9,6 +9,7 @@ edition = "2024"
 members = [ 
     # configurations
     "config/config_envfile", #1
+    "config/config_minimal", #2
     
     # open_api section
     "open_api/axum_open_api",
