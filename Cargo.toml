@@ -6,7 +6,7 @@ edition = "2024"
 [dependencies]
 
 [workspace]
-members = [ 
+members = [ "config/config_clap", 
     # configurations
     "config/config_envfile", "config/config_http", #1
     "config/config_minimal", #2
