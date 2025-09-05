@@ -6,10 +6,15 @@ edition = "2024"
 [dependencies]
 
 [workspace]
-members = [ "config/config_clap", 
+members = [ 
     # configurations
-    "config/config_envfile", "config/config_http", #1
+    "config/config_clap", #4
+    "config/config_envfile", #1
+    "config/config_http", #3
     "config/config_minimal", #2
+    
+    # grpc
+    "grpc/hello_tonic",
     
     # open_api section
     "open_api/axum_open_api",
