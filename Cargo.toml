@@ -14,7 +14,7 @@ members = [
     "config/config_minimal", #2
     
     # grpc
-    "grpc/hello_tonic",
+    "grpc/hello_tonic", "grpc/tonic_stream",
     
     # open_api section
     "open_api/axum_open_api",

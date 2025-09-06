@@ -1,0 +1,22 @@
+[package]
+name = "tonic_stream"
+version = "0.1.0"
+edition = "2024"
+
+[[bin]] # Bin to run the HelloWorld gRPC server
+name = "streaming-server"
+path = "src/server.rs"
+
+[[bin]] # Bin to run the HelloWorld gRPC client
+name = "streaming-client"
+path = "src/client.rs"
+
+[dependencies]
+prost = "0.14.1"
+tokio = { workspace = true, features = ["macros", "rt-multi-thread"]}
+tokio-stream = "0.1.17" # good to transform iterators to stream and other wrappers
+tonic = "0.14.2"
+tonic-prost = "0.14.2"
+
+[build-dependencies]
+tonic-prost-build = "0.14.2"
