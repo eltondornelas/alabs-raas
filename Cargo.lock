@@ -2418,6 +2418,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "tonic_auth"
+version = "0.1.0"
+dependencies = [
+ "prost",
+ "tokio",
+ "tonic",
+ "tonic-prost",
+ "tonic-prost-build",
+]
+
+[[package]]
 name = "tonic_stream"
 version = "0.1.0"
 dependencies = [

@@ -1,0 +1,21 @@
+[package]
+name = "tonic_auth"
+version = "0.1.0"
+edition = "2021"
+
+[[bin]] # Bin to run the HelloWorld gRPC server
+name = "auth-server"
+path = "src/server.rs"
+
+[[bin]] # Bin to run the HelloWorld gRPC client
+name = "auth-client"
+path = "src/client.rs"
+
+[dependencies]
+prost = "0.14.1"
+tokio = { workspace = true, features = ["macros", "rt-multi-thread"]}
+tonic = "0.14.2"
+tonic-prost = "0.14.2"
+
+[build-dependencies]
+tonic-prost-build = "0.14.2"
