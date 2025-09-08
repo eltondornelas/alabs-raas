@@ -28,8 +28,12 @@ members = [
     "tracing/axum_minimal_tracing", #1
     "tracing/axum_timing_spans", #3
     "tracing/axum_tracing_tower", #2 
-    "tracing/trace_to_file" #4
-, "web_socket/ws_echo"]
+    "tracing/trace_to_file", #4
+
+    # web_socker section
+    "web_socket/ws_client", #2
+    "web_socket/ws_echo" #1
+]
 
 [workspace.dependencies]
 axum = { version = "0.8.4" } 
