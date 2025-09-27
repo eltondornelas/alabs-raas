@@ -13,6 +13,9 @@ members = [
     "config/config_http", #3
     "config/config_minimal", #2
     
+    # service deployment section
+    "deployment/bookstore",
+    
     # grpc
     "grpc/hello_tonic", #1
     "grpc/tonic_auth", #3
