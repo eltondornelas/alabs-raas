@@ -44,3 +44,9 @@ async fn main() -> Result<()> {
 // APP_STATIC_CONTENT="static_html" cargo run
 // APP_STATIC_CONTENT="static_html" cargo build --release
 // cargo run ../../target/release/bookstore
+// https://docs.docker.com/guides/rust/
+// env variables goes to compose.yaml as well
+
+// docker compose upS
+// https://github.com/nakabonne/ali
+// ali -r 5000 http://localhost:3002/
