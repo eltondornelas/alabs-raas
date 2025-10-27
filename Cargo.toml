@@ -25,7 +25,8 @@ members = [
     "open_api/axum_open_api",
     
     # rest_service section
-    "rest_service/router_layer_response",
+    "rest_service/minimal_http_server", #1
+    "rest_service/router_layer_response", #n
     
     # tracing section
     "tracing/axum_minimal_tracing", #1
