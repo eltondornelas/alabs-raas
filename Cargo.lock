@@ -235,6 +235,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "axum_extractors"
+version = "0.1.0"
+dependencies = [
+ "axum",
+ "tokio",
+]
+
+[[package]]
 name = "axum_minimal_tracing"
 version = "0.1.0"
 dependencies = [
