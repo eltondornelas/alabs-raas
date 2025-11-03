@@ -1,0 +1,8 @@
+[package]
+name = "tower_mutable_server_state"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+axum = { workspace = true }
+tokio = { workspace = true }

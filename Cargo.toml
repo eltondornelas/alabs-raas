@@ -28,6 +28,7 @@ members = [
     "rest_service/axum_extractors", #2
     "rest_service/minimal_http_server", #1
     "rest_service/router_layer_response", #n
+    "rest_service/tower_mutable_server_state", #4
     "rest_service/tower_simple_server_state", #3
     
     # tracing section
